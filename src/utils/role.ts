@@ -1,0 +1,67 @@
+import {
+  type Guild,
+  type GuildMember,
+  EmbedBuilder,
+  Colors,
+} from 'discord.js';
+import { prisma } from '../db.js';
+
+export async function getTargetRoleId(guildId: string): Promise<string | null> {
+  const setting = await prisma.guildSetting.findUnique({
+    where: { guildId },
+  });
+  return setting?.targetRoleId ?? null;
+}
+
+export async function getOrCreateGuildSetting(guildId: string) {
+  return prisma.guildSetting.upsert({
+    where: { guildId },
+    create: { guildId },
+    update: {},
+  });
+}
+
+export async function refreshListingChannel(guild: Guild): Promise<void> {
+  const setting = await prisma.guildSetting.findUnique({
+    where: { guildId: guild.id },
+  });
+
+  if (!setting?.targetRoleId || !setting.listingChannelId) return;
+
+  const channel = guild.channels.cache.get(setting.listingChannelId);
+  if (!channel?.isTextBased()) return;
+
+  const allMembers = await guild.members.fetch();
+  const members: GuildMember[] = [];
+  for (const [, member] of allMembers) {
+    if (member.user.bot && member.roles.cache.has(setting.targetRoleId)) {
+      members.push(member);
+    }
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle('ログイン中のBot一覧')
+    .setColor(Colors.Green)
+    .setDescription(
+      members.length === 0
+        ? '現在ログイン中のBotはいません。'
+        : members.map((m) => `- ${m.user.tag} (${m.id})`).join('\n')
+    )
+    .setTimestamp();
+
+  if (setting.listingMessageId) {
+    try {
+      const message = await channel.messages.fetch(setting.listingMessageId);
+      await message.edit({ embeds: [embed] });
+      return;
+    } catch {
+      // message not found, fall through to send new one
+    }
+  }
+
+  const sent = await channel.send({ embeds: [embed] });
+  await prisma.guildSetting.update({
+    where: { guildId: guild.id },
+    data: { listingMessageId: sent.id },
+  });
+}

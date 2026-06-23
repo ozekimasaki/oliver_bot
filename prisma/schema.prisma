@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Bot {
+  id        String   @id @default(uuid())
+  discordId String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  bindings UserBotBinding[]
+}
+
+model GuildSetting {
+  id               String   @id @default(uuid())
+  guildId          String   @unique
+  targetRoleId     String?
+  listingChannelId String?
+  listingMessageId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model UserBotBinding {
+  id        String   @id @default(uuid())
+  userId    String
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, botId])
+}
+
+model AuthorizedSetupUser {
+  userId    String   @id
+  isMaster  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
