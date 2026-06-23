@@ -1,4 +1,5 @@
 import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
+import { prisma } from '../db.js';
 import { canOperateBot } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
 
@@ -7,20 +8,19 @@ export async function handleLogout(
 ): Promise<void> {
   await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-  const targetUser = interaction.options.getUser('bot', true);
+  const botDiscordId = interaction.options.getString('bot', true);
 
-  if (!targetUser.bot) {
-    await interaction.editReply('Botユーザーではないユーザーは指定できません。');
+  const botRecord = await prisma.bot.findUnique({
+    where: { discordId: botDiscordId },
+  });
+  if (!botRecord) {
+    await interaction.editReply('このBotは管理対象として登録されていません。`/setup register-bot` で登録してください。');
     return;
   }
 
-  const operationCheck = await canOperateBot(interaction.user.id, targetUser.id);
+  const operationCheck = await canOperateBot(interaction.user.id, botDiscordId);
   if (!operationCheck.ok) {
-    const message =
-      operationCheck.reason === 'bot-not-registered'
-        ? 'このBotは管理対象として登録されていません。`/setup register-bot` で登録してください。'
-        : 'このBotと紐づけられていません。管理者に `/setup bind` を依頼してください。';
-    await interaction.editReply(message);
+    await interaction.editReply('このBotと紐づけられていません。管理者に `/setup bind` を依頼してください。');
     return;
   }
 
@@ -36,9 +36,14 @@ export async function handleLogout(
     return;
   }
 
-  const member = await guild.members.fetch(targetUser.id).catch(() => null);
+  const member = await guild.members.fetch(botDiscordId).catch(() => null);
   if (!member) {
     await interaction.editReply('指定されたBotがこのサーバーに存在しません。');
+    return;
+  }
+
+  if (!member.user.bot) {
+    await interaction.editReply('Botユーザーではないユーザーは指定できません。');
     return;
   }
 
@@ -50,7 +55,7 @@ export async function handleLogout(
     return;
   }
 
-  await interaction.editReply(`${targetUser.tag} からログインロールを剥奪しました。`);
+  await interaction.editReply(`${member.user.tag} からログインロールを剥奪しました。`);
 
   await refreshListingChannel(guild, true);
 }

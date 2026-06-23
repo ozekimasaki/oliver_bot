@@ -3,22 +3,24 @@ import { SlashCommandBuilder } from 'discord.js';
 export const loginCommand = new SlashCommandBuilder()
   .setName('login')
   .setDescription('対象のBotにログインロールを付与します')
-  .addUserOption((option) =>
+  .addStringOption((option) =>
     option
       .setName('bot')
       .setDescription('ログインさせるBot')
       .setRequired(true)
+      .setAutocomplete(true)
   )
   .toJSON();
 
 export const logoutCommand = new SlashCommandBuilder()
   .setName('logout')
   .setDescription('対象のBotからログインロールを剥奪します')
-  .addUserOption((option) =>
+  .addStringOption((option) =>
     option
       .setName('bot')
       .setDescription('ログアウトさせるBot')
       .setRequired(true)
+      .setAutocomplete(true)
   )
   .toJSON();
 
