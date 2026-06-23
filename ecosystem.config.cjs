@@ -4,6 +4,7 @@ module.exports = {
       name: 'oliver_bot',
       script: './dist/index.js',
       cwd: '/home/ubuntu/oliver_bot',
+      exec_mode: 'fork',
       instances: 1,
       autorestart: true,
       watch: false,
