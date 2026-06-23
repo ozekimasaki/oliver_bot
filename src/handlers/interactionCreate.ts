@@ -1,6 +1,7 @@
 import { Events, MessageFlags, type Interaction } from 'discord.js';
 
 import { client } from '../client.js';
+import { handleHelp } from '../commands/help.js';
 import { handleLogin } from '../commands/login.js';
 import { handleLogout } from '../commands/logout.js';
 import { handleSetup } from '../commands/setup.js';
@@ -19,6 +20,9 @@ export function registerInteractionCreateHandler(): void {
           break;
         case 'setup':
           await handleSetup(interaction);
+          break;
+        case 'help':
+          await handleHelp(interaction);
           break;
         default:
           break;

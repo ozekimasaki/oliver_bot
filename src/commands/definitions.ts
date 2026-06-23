@@ -118,8 +118,14 @@ export const setupCommand = new SlashCommandBuilder()
   )
   .toJSON();
 
+export const helpCommand = new SlashCommandBuilder()
+  .setName('help')
+  .setDescription('利用可能なコマンド一覧を表示します')
+  .toJSON();
+
 export const commands = [
   loginCommand,
   logoutCommand,
   setupCommand,
+  helpCommand,
 ];
