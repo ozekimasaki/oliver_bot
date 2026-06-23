@@ -1,4 +1,4 @@
-import { type ChatInputCommandInteraction } from 'discord.js';
+import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { prisma } from '../db.js';
 import { canOperateBot } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
@@ -6,7 +6,7 @@ import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
 export async function handleLogin(
   interaction: ChatInputCommandInteraction
 ): Promise<void> {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
   const targetUser = interaction.options.getUser('bot', true);
 
@@ -53,5 +53,5 @@ export async function handleLogin(
 
   await interaction.editReply(`${targetUser.tag} にログインロールを付与しました。`);
 
-  await refreshListingChannel(guild);
+  await refreshListingChannel(guild, true);
 }

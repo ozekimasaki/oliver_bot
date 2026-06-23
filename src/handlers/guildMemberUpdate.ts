@@ -21,7 +21,7 @@ export function registerGuildMemberUpdateHandler(): void {
       const hasRole = newMember.roles.cache.has(setting.targetRoleId);
 
       if (hadRole !== hasRole) {
-        await refreshListingChannel(newMember.guild);
+        await refreshListingChannel(newMember.guild, true);
       }
     }
   );

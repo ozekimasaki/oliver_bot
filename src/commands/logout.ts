@@ -1,11 +1,11 @@
-import { type ChatInputCommandInteraction } from 'discord.js';
+import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { canOperateBot } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
 
 export async function handleLogout(
   interaction: ChatInputCommandInteraction
 ): Promise<void> {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
   const targetUser = interaction.options.getUser('bot', true);
 
@@ -52,5 +52,5 @@ export async function handleLogout(
 
   await interaction.editReply(`${targetUser.tag} からログインロールを剥奪しました。`);
 
-  await refreshListingChannel(guild);
+  await refreshListingChannel(guild, true);
 }

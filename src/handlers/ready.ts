@@ -19,7 +19,8 @@ export function registerReadyHandler(): void {
 
     const guild = client.guilds.cache.get(config.guildId);
     if (guild) {
-      await refreshListingChannel(guild);
+      await guild.members.fetch();
+      await refreshListingChannel(guild, true);
     }
   });
 }

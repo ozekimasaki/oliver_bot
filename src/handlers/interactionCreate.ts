@@ -1,4 +1,5 @@
-import { Events, type Interaction } from 'discord.js';
+import { Events, MessageFlags, type Interaction } from 'discord.js';
+
 import { client } from '../client.js';
 import { handleLogin } from '../commands/login.js';
 import { handleLogout } from '../commands/logout.js';
@@ -26,7 +27,6 @@ export function registerInteractionCreateHandler(): void {
       console.error('Error handling interaction:', error);
       const payload = {
         content: 'コマンドの実行中にエラーが発生しました。',
-        ephemeral: true,
       };
 
       if (interaction.deferred || interaction.replied) {

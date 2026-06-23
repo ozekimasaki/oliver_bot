@@ -21,7 +21,10 @@ export async function getOrCreateGuildSetting(guildId: string) {
   });
 }
 
-export async function refreshListingChannel(guild: Guild): Promise<void> {
+export async function refreshListingChannel(
+  guild: Guild,
+  useCache = true
+): Promise<void> {
   const setting = await prisma.guildSetting.findUnique({
     where: { guildId: guild.id },
   });
@@ -31,9 +34,11 @@ export async function refreshListingChannel(guild: Guild): Promise<void> {
   const channel = guild.channels.cache.get(setting.listingChannelId);
   if (!channel?.isTextBased()) return;
 
-  const allMembers = await guild.members.fetch();
+  const memberCollection = useCache
+    ? guild.members.cache
+    : await guild.members.fetch();
   const members: GuildMember[] = [];
-  for (const [, member] of allMembers) {
+  for (const [, member] of memberCollection) {
     if (member.user.bot && member.roles.cache.has(setting.targetRoleId)) {
       members.push(member);
     }

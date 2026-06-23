@@ -1,6 +1,7 @@
 import {
   type ChatInputCommandInteraction,
   ChannelType,
+  MessageFlags,
   PermissionFlagsBits,
 } from 'discord.js';
 import { prisma } from '../db.js';
@@ -10,7 +11,7 @@ import { getOrCreateGuildSetting, refreshListingChannel } from '../utils/role.js
 export async function handleSetup(
   interaction: ChatInputCommandInteraction
 ): Promise<void> {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
   const subcommand = interaction.options.getSubcommand(true);
 
@@ -226,5 +227,5 @@ async function handleCreateListingChannel(
 
   await interaction.editReply(`一覧チャンネル <#${channel.id}> を作成しました。`);
 
-  await refreshListingChannel(guild);
+  await refreshListingChannel(guild, true);
 }
