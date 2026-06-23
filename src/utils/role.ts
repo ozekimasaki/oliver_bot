@@ -3,6 +3,7 @@ import {
   type GuildMember,
   EmbedBuilder,
   Colors,
+  PermissionFlagsBits,
 } from 'discord.js';
 import { prisma } from '../db.js';
 
@@ -33,6 +34,13 @@ export async function refreshListingChannel(
 
   const channel = guild.channels.cache.get(setting.listingChannelId);
   if (!channel?.isTextBased()) return;
+
+  const me = guild.members.me;
+  if (me) {
+    const perms = channel.permissionsFor(me);
+    console.log(`[listing channel ${channel.id}] permissions:`, perms?.toArray());
+    console.log(`[listing channel ${channel.id}] can send messages:`, perms?.has(PermissionFlagsBits.SendMessages));
+  }
 
   const memberCollection = useCache
     ? guild.members.cache
