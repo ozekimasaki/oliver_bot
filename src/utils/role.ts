@@ -64,9 +64,13 @@ export async function refreshListingChannel(
     }
   }
 
-  const sent = await channel.send({ embeds: [embed] });
-  await prisma.guildSetting.update({
-    where: { guildId: guild.id },
-    data: { listingMessageId: sent.id },
-  });
+  try {
+    const sent = await channel.send({ embeds: [embed] });
+    await prisma.guildSetting.update({
+      where: { guildId: guild.id },
+      data: { listingMessageId: sent.id },
+    });
+  } catch (error) {
+    console.error('Failed to refresh listing channel:', error);
+  }
 }

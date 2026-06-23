@@ -218,7 +218,12 @@ async function handleCreateListingChannel(
       },
       {
         id: interaction.client.user.id,
-        allow: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel],
+        allow: [
+          PermissionFlagsBits.ViewChannel,
+          PermissionFlagsBits.SendMessages,
+          PermissionFlagsBits.ReadMessageHistory,
+          PermissionFlagsBits.EmbedLinks,
+        ],
       },
     ],
   });

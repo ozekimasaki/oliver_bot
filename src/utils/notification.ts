@@ -25,5 +25,9 @@ async function sendNotification(guild: Guild, message: string): Promise<void> {
   const channel = guild.channels.cache.get(setting.notificationChannelId);
   if (!channel?.isTextBased()) return;
 
-  await channel.send(message);
+  try {
+    await channel.send(message);
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+  }
 }
