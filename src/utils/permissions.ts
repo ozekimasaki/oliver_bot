@@ -39,7 +39,8 @@ export type BotOperationCheckResult =
 
 export async function canOperateBot(
   userId: string,
-  botDiscordId: string
+  botDiscordId: string,
+  isPrivileged = false
 ): Promise<BotOperationCheckResult> {
   const bot = await prisma.bot.findUnique({
     where: { discordId: botDiscordId },
@@ -47,6 +48,10 @@ export async function canOperateBot(
 
   if (!bot) {
     return { ok: false, reason: 'bot-not-registered' };
+  }
+
+  if (isPrivileged) {
+    return { ok: true };
   }
 
   const binding = await prisma.userBotBinding.findUnique({

@@ -1,6 +1,6 @@
 import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { prisma } from '../db.js';
-import { canOperateBot } from '../utils/permissions.js';
+import { canOperateBot, isAdminOrMaster } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
 
 export async function handleLogin(
@@ -18,7 +18,12 @@ export async function handleLogin(
     return;
   }
 
-  const operationCheck = await canOperateBot(interaction.user.id, botDiscordId);
+  const isPrivileged = await isAdminOrMaster(interaction);
+  const operationCheck = await canOperateBot(
+    interaction.user.id,
+    botDiscordId,
+    isPrivileged
+  );
   if (!operationCheck.ok) {
     await interaction.editReply('このBotと紐づけられていません。管理者に `/setup bind` を依頼してください。');
     return;
