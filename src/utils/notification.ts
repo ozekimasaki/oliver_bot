@@ -1,18 +1,18 @@
-import { type Guild, type User } from 'discord.js';
+import { type Guild } from 'discord.js';
 import { prisma } from '../db.js';
 
 export async function sendLoginNotification(
   guild: Guild,
-  operator: User
+  botName: string
 ): Promise<void> {
-  await sendNotification(guild, `${operator.tag} がログインしました。`);
+  await sendNotification(guild, `${botName} がログインしました。`);
 }
 
 export async function sendLogoutNotification(
   guild: Guild,
-  operator: User
+  botName: string
 ): Promise<void> {
-  await sendNotification(guild, `${operator.tag} がログアウトしました。`);
+  await sendNotification(guild, `${botName} がログアウトしました。`);
 }
 
 async function sendNotification(guild: Guild, message: string): Promise<void> {
