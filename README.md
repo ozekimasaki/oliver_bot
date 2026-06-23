@@ -102,16 +102,26 @@ npm start
 sudo npm install -g pm2
 ```
 
-### 2. プロジェクトを VPS に配置
+### 2. プロジェクトを VPS にクローン
+
+既存の `/home/ubuntu/oliver_bot` がある場合は、事前にバックアップしておいてください。
 
 ```bash
 cd /home/ubuntu
+# 既存がある場合はバックアップ
+mv oliver_bot oliver_bot_backup
+
+# GitHub からクローン
 git clone https://github.com/ozekimasaki/oliver_bot.git
 cd oliver_bot
 npm install
 ```
 
 ### 3. 環境変数とデータベースの準備
+
+`.env` と SQLite のデータベースファイルは Git 管理されていません。
+
+初回設定時：
 
 ```bash
 cp .env.example .env
@@ -121,6 +131,11 @@ npx prisma generate
 npm run build
 npm run deploy-commands
 ```
+
+既存のデータを引き継ぐ場合は、`oliver_bot_backup` から以下をコピーしてください。
+
+- `.env`
+- `dev.db`
 
 ### 4. pm2 で起動
 
@@ -141,6 +156,17 @@ pm2 save
 pm2 status
 pm2 logs oliver_bot
 pm2 stop oliver_bot
+pm2 restart oliver_bot
+```
+
+### 7. 更新時
+
+```bash
+cd /home/ubuntu/oliver_bot
+git pull
+npm install
+npm run build
+npm run deploy-commands
 pm2 restart oliver_bot
 ```
 
