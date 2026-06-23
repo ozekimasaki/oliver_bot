@@ -239,56 +239,44 @@ async function handleCreateListingChannel(
 async function handleNotificationChannel(
   interaction: ChatInputCommandInteraction
 ): Promise<void> {
-  const botUser = interaction.options.getUser('bot', true);
+  const guild = interaction.guild;
+  if (!guild) {
+    await interaction.editReply('Guild内でのみ実行できます。');
+    return;
+  }
+
   const channel = interaction.options.getChannel('channel', true);
 
-  if (!botUser.bot) {
-    await interaction.editReply('Botユーザーを指定してください。');
-    return;
-  }
-
-  const bot = await prisma.bot.findUnique({
-    where: { discordId: botUser.id },
-  });
-
-  if (!bot) {
-    await interaction.editReply('指定されたBotは登録されていません。');
-    return;
-  }
-
-  await prisma.bot.update({
-    where: { id: bot.id },
-    data: { notificationChannelId: channel.id },
+  await prisma.guildSetting.upsert({
+    where: { guildId: guild.id },
+    create: {
+      guildId: guild.id,
+      notificationChannelId: channel.id,
+    },
+    update: {
+      notificationChannelId: channel.id,
+    },
   });
 
   await interaction.editReply(
-    `${botUser.tag} の通知チャンネルを <#${channel.id}> に設定しました。`
+    `ログイン・ログアウト通知チャンネルを <#${channel.id}> に設定しました。`
   );
 }
 
 async function handleRemoveNotificationChannel(
   interaction: ChatInputCommandInteraction
 ): Promise<void> {
-  const botUser = interaction.options.getUser('bot', true);
-
-  if (!botUser.bot) {
-    await interaction.editReply('Botユーザーを指定してください。');
+  const guild = interaction.guild;
+  if (!guild) {
+    await interaction.editReply('Guild内でのみ実行できます。');
     return;
   }
 
-  const bot = await prisma.bot.findUnique({
-    where: { discordId: botUser.id },
+  await prisma.guildSetting.upsert({
+    where: { guildId: guild.id },
+    create: { guildId: guild.id },
+    update: { notificationChannelId: null },
   });
 
-  if (!bot) {
-    await interaction.editReply('指定されたBotは登録されていません。');
-    return;
-  }
-
-  await prisma.bot.update({
-    where: { id: bot.id },
-    data: { notificationChannelId: null },
-  });
-
-  await interaction.editReply(`${botUser.tag} の通知チャンネル設定を解除しました。`);
+  await interaction.editReply('ログイン・ログアウト通知チャンネル設定を解除しました。');
 }

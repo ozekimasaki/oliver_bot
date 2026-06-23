@@ -3,32 +3,26 @@ import { prisma } from '../db.js';
 
 export async function sendLoginNotification(
   guild: Guild,
-  botDiscordId: string,
   operator: User
 ): Promise<void> {
-  await sendNotification(guild, botDiscordId, `${operator.tag} がログインしました。`);
+  await sendNotification(guild, `${operator.tag} がログインしました。`);
 }
 
 export async function sendLogoutNotification(
   guild: Guild,
-  botDiscordId: string,
   operator: User
 ): Promise<void> {
-  await sendNotification(guild, botDiscordId, `${operator.tag} がログアウトしました。`);
+  await sendNotification(guild, `${operator.tag} がログアウトしました。`);
 }
 
-async function sendNotification(
-  guild: Guild,
-  botDiscordId: string,
-  message: string
-): Promise<void> {
-  const bot = await prisma.bot.findUnique({
-    where: { discordId: botDiscordId },
+async function sendNotification(guild: Guild, message: string): Promise<void> {
+  const setting = await prisma.guildSetting.findUnique({
+    where: { guildId: guild.id },
   });
 
-  if (!bot?.notificationChannelId) return;
+  if (!setting?.notificationChannelId) return;
 
-  const channel = guild.channels.cache.get(bot.notificationChannelId);
+  const channel = guild.channels.cache.get(setting.notificationChannelId);
   if (!channel?.isTextBased()) return;
 
   await channel.send(message);

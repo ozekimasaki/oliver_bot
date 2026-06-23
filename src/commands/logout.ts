@@ -63,6 +63,6 @@ export async function handleLogout(
 
   await interaction.editReply(`${member.user.tag} からログインロールを剥奪しました。`);
 
-  await sendLogoutNotification(guild, botDiscordId, interaction.user);
+  await sendLogoutNotification(guild, interaction.user);
   await refreshListingChannel(guild, true);
 }

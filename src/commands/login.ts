@@ -63,6 +63,6 @@ export async function handleLogin(
 
   await interaction.editReply(`${member.user.tag} にログインロールを付与しました。`);
 
-  await sendLoginNotification(guild, botDiscordId, interaction.user);
+  await sendLoginNotification(guild, interaction.user);
   await refreshListingChannel(guild, true);
 }

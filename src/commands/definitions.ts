@@ -119,13 +119,7 @@ export const setupCommand = new SlashCommandBuilder()
   .addSubcommand((subcommand) =>
     subcommand
       .setName('notification-channel')
-      .setDescription('Botのログイン・ログアウト通知チャンネルを設定します')
-      .addUserOption((option) =>
-        option
-          .setName('bot')
-          .setDescription('通知対象のBot')
-          .setRequired(true)
-      )
+      .setDescription('ログイン・ログアウト通知チャンネルを設定します')
       .addChannelOption((option) =>
         option
           .setName('channel')
@@ -136,13 +130,7 @@ export const setupCommand = new SlashCommandBuilder()
   .addSubcommand((subcommand) =>
     subcommand
       .setName('remove-notification-channel')
-      .setDescription('Botのログイン・ログアウト通知チャンネル設定を解除します')
-      .addUserOption((option) =>
-        option
-          .setName('bot')
-          .setDescription('解除するBot')
-          .setRequired(true)
-      )
+      .setDescription('ログイン・ログアウト通知チャンネル設定を解除します')
   )
   .toJSON();
 

@@ -8,23 +8,23 @@ datasource db {
 }
 
 model Bot {
-  id                   String   @id @default(uuid())
-  discordId            String   @unique
-  name                 String
-  notificationChannelId String?
-  createdAt            DateTime @default(now())
+  id        String   @id @default(uuid())
+  discordId String   @unique
+  name      String
+  createdAt DateTime @default(now())
 
   bindings UserBotBinding[]
 }
 
 model GuildSetting {
-  id               String   @id @default(uuid())
-  guildId          String   @unique
-  targetRoleId     String?
-  listingChannelId String?
-  listingMessageId String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  guildId              String   @unique
+  targetRoleId         String?
+  listingChannelId     String?
+  listingMessageId     String?
+  notificationChannelId String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 model UserBotBinding {
