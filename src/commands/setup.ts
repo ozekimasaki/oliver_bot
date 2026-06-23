@@ -50,6 +50,12 @@ export async function handleSetup(
     case 'create-listing-channel':
       await handleCreateListingChannel(interaction);
       break;
+    case 'notification-channel':
+      await handleNotificationChannel(interaction);
+      break;
+    case 'remove-notification-channel':
+      await handleRemoveNotificationChannel(interaction);
+      break;
     default:
       await interaction.editReply('未知のサブコマンドです。');
   }
@@ -228,4 +234,61 @@ async function handleCreateListingChannel(
   await interaction.editReply(`一覧チャンネル <#${channel.id}> を作成しました。`);
 
   await refreshListingChannel(guild, true);
+}
+
+async function handleNotificationChannel(
+  interaction: ChatInputCommandInteraction
+): Promise<void> {
+  const botUser = interaction.options.getUser('bot', true);
+  const channel = interaction.options.getChannel('channel', true);
+
+  if (!botUser.bot) {
+    await interaction.editReply('Botユーザーを指定してください。');
+    return;
+  }
+
+  const bot = await prisma.bot.findUnique({
+    where: { discordId: botUser.id },
+  });
+
+  if (!bot) {
+    await interaction.editReply('指定されたBotは登録されていません。');
+    return;
+  }
+
+  await prisma.bot.update({
+    where: { id: bot.id },
+    data: { notificationChannelId: channel.id },
+  });
+
+  await interaction.editReply(
+    `${botUser.tag} の通知チャンネルを <#${channel.id}> に設定しました。`
+  );
+}
+
+async function handleRemoveNotificationChannel(
+  interaction: ChatInputCommandInteraction
+): Promise<void> {
+  const botUser = interaction.options.getUser('bot', true);
+
+  if (!botUser.bot) {
+    await interaction.editReply('Botユーザーを指定してください。');
+    return;
+  }
+
+  const bot = await prisma.bot.findUnique({
+    where: { discordId: botUser.id },
+  });
+
+  if (!bot) {
+    await interaction.editReply('指定されたBotは登録されていません。');
+    return;
+  }
+
+  await prisma.bot.update({
+    where: { id: bot.id },
+    data: { notificationChannelId: null },
+  });
+
+  await interaction.editReply(`${botUser.tag} の通知チャンネル設定を解除しました。`);
 }

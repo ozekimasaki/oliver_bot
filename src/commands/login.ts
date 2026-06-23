@@ -2,6 +2,7 @@ import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { prisma } from '../db.js';
 import { canOperateBot, isAdminOrMaster } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
+import { sendLoginNotification } from '../utils/notification.js';
 
 export async function handleLogin(
   interaction: ChatInputCommandInteraction
@@ -62,5 +63,6 @@ export async function handleLogin(
 
   await interaction.editReply(`${member.user.tag} にログインロールを付与しました。`);
 
+  await sendLoginNotification(guild, botDiscordId, interaction.user);
   await refreshListingChannel(guild, true);
 }

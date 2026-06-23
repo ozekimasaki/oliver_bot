@@ -2,6 +2,7 @@ import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { prisma } from '../db.js';
 import { canOperateBot, isAdminOrMaster } from '../utils/permissions.js';
 import { getTargetRoleId, refreshListingChannel } from '../utils/role.js';
+import { sendLogoutNotification } from '../utils/notification.js';
 
 export async function handleLogout(
   interaction: ChatInputCommandInteraction
@@ -62,5 +63,6 @@ export async function handleLogout(
 
   await interaction.editReply(`${member.user.tag} からログインロールを剥奪しました。`);
 
+  await sendLogoutNotification(guild, botDiscordId, interaction.user);
   await refreshListingChannel(guild, true);
 }

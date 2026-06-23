@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Bot {
-  id        String   @id @default(uuid())
-  discordId String   @unique
-  name      String
-  createdAt DateTime @default(now())
+  id                   String   @id @default(uuid())
+  discordId            String   @unique
+  name                 String
+  notificationChannelId String?
+  createdAt            DateTime @default(now())
 
   bindings UserBotBinding[]
 }
