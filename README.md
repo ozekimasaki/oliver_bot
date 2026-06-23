@@ -94,6 +94,56 @@ npm start
 - `/setup` の各サブコマンドは、サーバー管理者または `/setup authorize` で追加されたユーザーのみ実行可能
 - `/setup authorize` はサーバー管理者のみ実行可能
 
+## pm2 での常駐実行（Ubuntu）
+
+### 1. pm2 のインストール
+
+```bash
+sudo npm install -g pm2
+```
+
+### 2. プロジェクトを VPS に配置
+
+```bash
+cd /home/ubuntu
+git clone https://github.com/ozekimasaki/oliver_bot.git
+cd oliver_bot
+npm install
+```
+
+### 3. 環境変数とデータベースの準備
+
+```bash
+cp .env.example .env
+# .env を編集して本番値を設定
+npx prisma db push
+npx prisma generate
+npm run build
+npm run deploy-commands
+```
+
+### 4. pm2 で起動
+
+```bash
+pm2 start ecosystem.config.cjs
+```
+
+### 5. 自動起動の設定
+
+```bash
+pm2 startup
+pm2 save
+```
+
+### 6. 確認・停止・再起動
+
+```bash
+pm2 status
+pm2 logs oliver_bot
+pm2 stop oliver_bot
+pm2 restart oliver_bot
+```
+
 ## 注意事項
 
 - 管理 Bot は、付け外し対象のロールよりも上位のロールを持つ必要があります
