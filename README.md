@@ -36,8 +36,11 @@ cp .env.example .env
 ```env
 DISCORD_TOKEN=管理Botのトークン
 GUILD_ID=対象サーバーID
+AUTHORIZED_USER_IDS=マスター権限を持つユーザーIDをカンマ区切りで指定
 DATABASE_URL="file:./dev.db"
 ```
+
+いずれの環境変数も必須です。未設定の場合、起動時に `Missing environment variable: <KEY>` エラーで終了します。`AUTHORIZED_USER_IDS` はカンマ区切りで複数指定でき、ここに含まれるユーザーはサーバー管理者と同等に `/setup authorize` などを実行できます。
 
 ### 3. データベースの準備
 
@@ -85,14 +88,22 @@ npm start
 | `/setup unregister-bot @Bot` | 管理対象 Bot を削除 |
 | `/setup bind @ユーザー @Bot` | ユーザーと Bot を紐づけ |
 | `/setup unbind @ユーザー @Bot` | ユーザーと Bot の紐づけを解除 |
-| `/setup authorize @ユーザー` | setup 権限ユーザーを追加（管理者のみ） |
+| `/setup authorize @ユーザー` | setup 権限ユーザーを追加（管理者・マスターのみ） |
 | `/setup create-listing-channel [名前]` | ログイン中 Bot 一覧チャンネルを作成 |
+| `/setup notification-channel #チャンネル` | ログイン・ログアウト通知チャンネルを設定 |
+| `/setup remove-notification-channel` | ログイン・ログアウト通知チャンネル設定を解除 |
+
+### ヘルプ
+
+| コマンド | 説明 |
+|---------|------|
+| `/help` | 利用可能なコマンド一覧を表示 |
 
 ## 権限について
 
 - `/login` / `/logout` は、対象 Bot と紐づけられたユーザーのみ実行可能
 - `/setup` の各サブコマンドは、サーバー管理者または `/setup authorize` で追加されたユーザーのみ実行可能
-- `/setup authorize` はサーバー管理者のみ実行可能
+- `/setup authorize` はサーバー管理者、または `AUTHORIZED_USER_IDS` に含まれるマスター権限ユーザーのみ実行可能
 
 ## pm2 での常駐実行（Ubuntu）
 
@@ -170,7 +181,47 @@ npm run deploy-commands
 pm2 restart oliver_bot
 ```
 
+## 開発コマンド
+
+| コマンド | 説明 |
+|---------|------|
+| `npm run dev` | `tsx` で `src/index.ts` を直接実行（開発用） |
+| `npm run build` | `tsc` で `src` を `dist` にコンパイル（型チェックを兼ねる） |
+| `npm start` | ビルド済みの `dist/index.js` を実行（本番用） |
+| `npm run deploy-commands` | スラッシュコマンドを対象ギルドに登録 |
+| `npm run db:migrate` | `prisma migrate dev` でマイグレーションを作成・適用 |
+| `npm run db:generate` | Prisma Client を生成 |
+| `npm run db:studio` | Prisma Studio を起動 |
+
+※ 専用の lint / test スクリプトは定義されていません。型チェックは `npm run build` で行います。
+
+## プロジェクト構成
+
+```
+.
+├── prisma/
+│   └── schema.prisma        # DB スキーマ（Bot / GuildSetting / UserBotBinding / AuthorizedSetupUser）
+├── src/
+│   ├── index.ts             # エントリポイント。各ハンドラを登録し client.login を呼ぶ
+│   ├── client.ts            # discord.js Client（Intents / Partials）の定義
+│   ├── config.ts            # 環境変数の読み込みと検証
+│   ├── db.ts                # PrismaClient シングルトン
+│   ├── deploy-commands.ts   # スラッシュコマンド登録スクリプト
+│   ├── diagnose.ts          # DB 内容を出力する診断スクリプト
+│   ├── commands/            # コマンド定義とハンドラ（login / logout / setup / help）
+│   ├── handlers/            # Discord イベントハンドラ（ready / interactionCreate / autocomplete / guildMemberUpdate）
+│   └── utils/               # ロール操作・権限判定・通知のユーティリティ
+├── ecosystem.config.cjs     # pm2 常駐実行の設定
+├── tsconfig.json
+└── package.json
+```
+
 ## 注意事項
 
 - 管理 Bot は、付け外し対象のロールよりも上位のロールを持つ必要があります
 - 一覧表示チャンネルは対象ロールの付与/剥奪イベントを検知して自動更新されます
+- `notification-channel` を設定すると、ログイン/ログアウト時に該当チャンネルへ通知が送信されます
+
+## ライセンス
+
+[MIT](https://opensource.org/licenses/MIT) License
